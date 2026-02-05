@@ -8,8 +8,14 @@ from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import authenticate
 from .serializers import RegisterSerializer, UserSerializer
 from .models import Dataset, Equipment
+from django.db.models import Count
 
 import pandas as pd
+from django.http import HttpResponse
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import inch
+from io import BytesIO
 
 @api_view(['GET'])
 def health_check(request):
@@ -170,5 +176,97 @@ def delete_dataset(request, dataset_id):
             'error': 'Dataset not found'
         }, status=status.HTTP_404_NOT_FOUND)
     
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_type_distribution(request, dataset_id):
+    try:
+        dataset = Dataset.objects.get(id=dataset_id, user=request.user)
 
+        equipment_list = dataset.equipment.all()
+        
+        distribution = {}
+        for equip in equipment_list:
+            equip_type = equip.equipment_type
+            if equip_type not in distribution:
+                distribution[equip_type] = {
+                    'equipment_type': equip_type,
+                    'count': 0,
+                    'equipment_names': []
+                }
+            distribution[equip_type]['count'] += 1
+            distribution[equip_type]['equipment_names'].append(equip.name)
+        
+        result = sorted(distribution.values(), key=lambda x: x['count'], reverse=True)
+        return Response({
+            'dataset_id': dataset.id,
+            'distribution': result
+        }, status=status.HTTP_200_OK)
+    except Dataset.DoesNotExist:
+        return Response({
+            'error': 'Dataset not found'
+        }, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({
+            'error': str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def generate_pdf(request, dataset_id):
+    try:
+        dataset = Dataset.objects.get(id=dataset_id, user=request.user)
+        
+        buffer = BytesIO()
+        p = canvas.Canvas(buffer, pagesize=letter)
+        width, height = letter
+
+        # Title
+        p.setFont("Helvetica-Bold", 16)
+        p.drawString(1*inch, height - 1*inch, "Equipment Usage Report")
+
+        # Dataset Info
+        p.setFont("Helvetica", 12)
+        y = height - 1.5*inch
+        p.drawString(1*inch, y, f"Filename: {dataset.filename}")
+        y -= 0.3*inch
+        p.drawString(1*inch, y, f"Uploaded: {dataset.uploaded_at.strftime('%Y-%m-%d %H:%M')}")
+        y -= 0.3*inch
+        p.drawString(1*inch, y, f"Total Equipment: {dataset.total_count}")
+        
+        # Statistics
+        y -= 0.5*inch
+        p.setFont("Helvetica-Bold", 14)
+        p.drawString(1*inch, y, "Statistics:")
+        p.setFont("Helvetica", 12)
+        y -= 0.3*inch
+        p.drawString(1*inch, y, f"Average Flowrate: {dataset.avg_flowrate:.2f}")
+        y -= 0.3*inch
+        p.drawString(1*inch, y, f"Average Pressure: {dataset.avg_pressure:.2f}")
+        y -= 0.3*inch
+        p.drawString(1*inch, y, f"Average Temperature: {dataset.avg_temperature:.2f}")
+        
+        # Type distribution
+        y -= 0.5*inch
+        p.setFont("Helvetica-Bold", 14)
+        p.drawString(1*inch, y, "Equipment Type Distribution:")
+        
+        distribution = dataset.equipment.values('equipment_type').annotate(
+            count=Count('equipment_type')
+        )
+        
+        p.setFont("Helvetica", 12)
+        for item in distribution:
+            y -= 0.3*inch
+            p.drawString(1.2*inch, y, f"{item['equipment_type']}: {item['count']}")
+        
+        p.showPage()
+        p.save()
+        
+        buffer.seek(0)
+        response = HttpResponse(buffer, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{dataset.filename}_report.pdf"'
+        return response
+    except Dataset.DoesNotExist:
+        return Response({
+            'error': 'Dataset not found'
+        }, status=status.HTTP_404_NOT_FOUND)
