@@ -12,5 +12,6 @@ urlpatterns = [
     path('api/datasets/<int:dataset_id>/', views.get_dataset_details),
     path('api/datasets/<int:dataset_id>/delete/', views.delete_dataset),
     path('api/datasets/<int:dataset_id>/type_distribution/', views.get_type_distribution),
-    path('api/datasets/<int:dataset_id>/report/', views.generate_pdf)
+    path('api/datasets/<int:dataset_id>/report/', views.generate_pdf),
+    path('api/datasets/<int:dataset_id>/raw/', views.get_raw_data)
 ]

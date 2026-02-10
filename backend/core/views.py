@@ -227,6 +227,21 @@ def _fig_to_image(fig):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
+def get_raw_data(request, dataset_id):
+    dataset = Dataset.objects.get(id=dataset_id, user=request.user)
+    equipment = dataset.equipment.all()
+
+    return Response({
+        "names": [e.name for e in equipment],
+        "flowrates": [e.flowrate for e in equipment],
+        "pressures": [e.pressure for e in equipment],
+        "temperatures": [e.temperature for e in equipment],
+        "types": [e.equipment_type for e in equipment],
+    })
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def generate_pdf(request, dataset_id):
     plt.switch_backend("Agg")
     plt.style.use("seaborn-v0_8")
