@@ -98,6 +98,8 @@ class DashboardWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, username, api_client):
         super().__init__()
         self.setupUi(self)
+        self.resize(1400, 1000)
+        self.setMinimumSize(900, 600)
         self.username = username
         self.api_client = api_client
         self.current_dataset_id = None

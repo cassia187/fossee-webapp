@@ -2,7 +2,8 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QSizePolicy
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
-import matplotlib.pyplot as plt
+from PyQt5.QtWidgets import QAction, QFileDialog
+
 
 class Canvas(FigureCanvas):
     def __init__(self, parent=None, width=8, height=6, dpi=100):
@@ -25,8 +26,11 @@ class MatplotlibWidget(QWidget):
         # remove certain actions from toolbar
         for action in self.toolbar.actions():
             text = action.text().lower()
-            if "customize" in text or "subplot" in text or "edit" in text:
+            if any(k in text for k in ["save", "customize", "subplot", "edit"]):
                 self.toolbar.removeAction(action)
+        save_pdf_action = QAction("Save PDF", self)
+        save_pdf_action.triggered.connect(self.save_pdf)
+        self.toolbar.addAction(save_pdf_action)
 
         # Vertical Qt layout on the right side on dashboard
         # -----------Toolbar-----------
@@ -45,3 +49,17 @@ class MatplotlibWidget(QWidget):
 
     def draw(self):
         return self.canvas.draw()
+
+    def save_pdf(self):
+        file_path, _ = QFileDialog.getSaveFileName(
+            self,
+            "Save PDF",
+            "",
+            "PDF Files (*.pdf)"
+        )
+
+        if file_path:
+            if not file_path.endswith(".pdf"):
+                file_path += ".pdf"
+
+            self.canvas.fig.savefig(file_path, format="pdf")

@@ -61,22 +61,26 @@ class DataVisualizer:
 
         axis.set_title('Equipment Type Distribution', fontweight='bold', fontsize=11)
 
-
     def plot_avg_by_type(self, axis, equipment_data):
         type_stats = {}
+
         for equipment in equipment_data:
-            eq_type = equipment.get('equipment_type', 'Unknown')
+            raw_type = equipment.get('equipment_type')
+            eq_type = str(raw_type).strip() if raw_type else "Unknown"
+
             if eq_type not in type_stats:
                 type_stats[eq_type] = {
                     'flowrates': [],
                     'pressures': [],
                     'temperatures': []
                 }
-            type_stats[eq_type]['flowrates'].append(equipment.get('flowrate', 0))
-            type_stats[eq_type]['pressures'].append(equipment.get('pressure', 0))
-            type_stats[eq_type]['temperatures'].append(equipment.get('temperature', 0))
 
-        types = list(type_stats.keys())
+            type_stats[eq_type]['flowrates'].append(equipment.get('flowrate', 0) or 0)
+            type_stats[eq_type]['pressures'].append(equipment.get('pressure', 0) or 0)
+            type_stats[eq_type]['temperatures'].append(equipment.get('temperature', 0) or 0)
+
+        types = [str(t).strip() if t else "Unknown" for t in type_stats.keys()]
+
         avg_flowrates = [np.mean(type_stats[t]['flowrates']) for t in types]
         avg_pressures = [np.mean(type_stats[t]['pressures']) for t in types]
         avg_temperatures = [np.mean(type_stats[t]['temperatures']) for t in types]
@@ -84,20 +88,19 @@ class DataVisualizer:
         x = np.arange(len(types))
         width = 0.3
 
-        # TODO: encapsulate below duplicate code in future
-        bars1 = axis.bar(x - width, avg_flowrates, width, label="Flowrate", color="#3498db")
-        bars2 = axis.bar(x, avg_pressures, width, label="Pressure", color="#e74c3c")
-        bars3 = axis.bar(x + width, avg_temperatures, width, label="Temperature", color="#f39c12")
+        axis.bar(x - width, avg_flowrates, width, label="Flowrate", color="#3498db")
+        axis.bar(x, avg_pressures, width, label="Pressure", color="#e74c3c")
+        axis.bar(x + width, avg_temperatures, width, label="Temperature", color="#f39c12")
 
         axis.set_xlabel('Equipment Type', fontweight='bold')
         axis.set_ylabel('Average Value', fontweight='bold')
         axis.set_title('Average Parameters by Type', fontweight='bold', fontsize=11)
+
         axis.set_xticks(x)
         axis.set_xticklabels(types, rotation=45, ha='right', fontsize=9)
+
         axis.legend(fontsize=8)
         axis.grid(axis='y', alpha=0.3)
-        axis.set_xscale('linear')
-        axis.set_yscale('linear')
 
     def plot_flowrate_vs_pressure(self, axis, equipment_data):
         type_data = {}
