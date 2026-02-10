@@ -2,6 +2,8 @@
 
 A full-stack data analysis and visualization platform with dual frontend support (PyQt5 desktop and React web). Upload CSV datasets, visualize data through interactive charts, and generate comprehensive PDF reports. Created to solve the FOSSEE 2026 semester-long internship screening task.
 
+## Try it at: https://test.komisan.dev
+
 ## 📋 Table of Contents
 
 - [Features](#features)
