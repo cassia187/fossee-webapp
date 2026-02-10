@@ -1,0 +1,41 @@
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QSizePolicy
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
+
+class Canvas(FigureCanvas):
+    def __init__(self, parent=None, width=8, height=6, dpi=100):
+        self.fig = Figure(figsize=(width, height), dpi=dpi)
+        super(Canvas, self).__init__(self.fig)
+        self.setParent(parent)
+
+        FigureCanvas.setSizePolicy(self,
+                                   QSizePolicy.Expanding,
+                                   QSizePolicy.Expanding)
+        FigureCanvas.updateGeometry(self)
+
+
+class MatplotlibWidget(QWidget):
+    def __init__(self, parent=None):
+        super(MatplotlibWidget, self).__init__(parent)
+        self.canvas = Canvas(self, width=8, height=6, dpi=100)
+        self.toolbar = NavigationToolbar(self.canvas, self)
+
+        # Vertical Qt layout on the right side on dashboard
+        # -----------Toolbar-----------
+        # -----------Canvas------------
+        layout = QVBoxLayout()
+        layout.addWidget(self.toolbar)
+        layout.addWidget(self.canvas)
+        self.setLayout(layout)
+
+    def get_figure(self):
+        return self.canvas.fig
+
+    def clear(self):
+        self.canvas.fig.clear()
+        self.canvas.draw()
+
+    def draw(self):
+        return self.canvas.draw()
