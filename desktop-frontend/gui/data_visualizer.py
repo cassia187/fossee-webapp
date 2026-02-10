@@ -37,7 +37,7 @@ class DataVisualizer:
         self.plot_temperature_distribution(axis4, equipment_data)
 
         filename = dataset_details.get('filename', 'Dataset')
-        self.figure.subtitle(f"Equipment Analysis Dashboard - {filename}", fontsize=14, fontweight='bold')
+        self.figure.suptitle(f"Equipment Analysis Dashboard - {filename}", fontsize=14, fontweight='bold')
 
     def plot_type_distribution(self, axis, distribution):
         if not distribution or 'distribution' not in distribution:
@@ -77,9 +77,9 @@ class DataVisualizer:
             type_stats[eq_type]['temperatures'].append(equipment.get('temperature', 0))
 
         types = list(type_stats.keys())
-        avg_flowrates = [np.mean(type_stats['flowrates']) for t in types]
-        avg_pressures = [np.mean(type_stats['pressures']) for t in types]
-        avg_temperatures = [np.mean(type_stats['temperatures']) for t in types]
+        avg_flowrates = [np.mean(type_stats[t]['flowrates']) for t in types]
+        avg_pressures = [np.mean(type_stats[t]['pressures']) for t in types]
+        avg_temperatures = [np.mean(type_stats[t]['temperatures']) for t in types]
 
         x = np.arange(len(types))
         width = 0.3
@@ -93,10 +93,11 @@ class DataVisualizer:
         axis.set_ylabel('Average Value', fontweight='bold')
         axis.set_title('Average Parameters by Type', fontweight='bold', fontsize=11)
         axis.set_xticks(x)
-        axis.set_xticklabels(types, rotations=45, ha='right', fontsize=9)
+        axis.set_xticklabels(types, rotation=45, ha='right', fontsize=9)
         axis.legend(fontsize=8)
         axis.grid(axis='y', alpha=0.3)
-
+        axis.set_xscale('linear')
+        axis.set_yscale('linear')
 
     def plot_flowrate_vs_pressure(self, axis, equipment_data):
         type_data = {}
@@ -123,19 +124,35 @@ class DataVisualizer:
         axis.set_title('Flowrate vs. Pressure by type', fontweight='bold', fontsize=11)
         axis.legend(fontsize=8, loc='best')
         axis.grid(axis='y', alpha=0.3)
+        axis.set_xscale('linear')
+        axis.set_yscale('linear')
 
     def plot_temperature_distribution(self, axis, equipment_data):
+
         temperatures = [equipment.get('temperature', 0) for equipment in equipment_data]
+        # Reject if no variance in temps
+        if not temperatures or len(set(temperatures)) <= 1:
+            axis.text(0.5, 0.5, "Not enough temperature variation",
+                      ha="center", va="center")
+            axis.axis("off")
+            return
 
     #    histogram
         n, bins, patches = axis.hist(temperatures, bins=8, color='#2ecc71',
                                      alpha=0.7, edgecolor='black')
 
         cm = plt.cm.RdYlGn_r
-        norm = plt.Normalize(vmin=min(temperatures), vmax=max(temperatures))
+
+        # Used to prevent infinity error
+        min_t = min(temperatures)
+        max_t = max(temperatures)
+
+        if min_t == max_t:
+            max_t += 1
+        norm = plt.Normalize(vmin=min_t, vmax=max_t)
 
         for i, patch in enumerate(patches):
-            patch.get_facecolor(cm(norm(bins[i])))
+            patch.set_facecolor(cm(norm(bins[i])))
 
         axis.set_xlabel('Temperature', fontweight='bold')
         axis.set_ylabel('Frequency', fontweight='bold')
@@ -143,10 +160,16 @@ class DataVisualizer:
         axis.grid(axis='y', alpha=0.3)
 
     #     avg line
+        if len(temperatures) == 0:
+            return
+
         avg_temp = np.mean(temperatures)
+
         axis.axvline(avg_temp, color='red', linestyle='--', linewidth=2,
                      label=f'Average: {avg_temp:.1f}')
         axis.legend(fontsize=8)
+        axis.set_xscale('linear')
+        axis.set_yscale('linear')
 
     def create_detailed_view(self, dataset_details):
         self.clear()
@@ -159,7 +182,7 @@ class DataVisualizer:
             axis.axis('off')
             return
 
-        axis = self.figure_add_subplot(111)
+        axis = self.figure.add_subplot(111)
 
         names = [eq.get('name', 'Unknown') for eq in equipment_data]
         flowrates = [eq.get('flowrate', 0) for eq in equipment_data]
@@ -182,7 +205,8 @@ class DataVisualizer:
         axis.legend()
         axis.grid(axis='y', alpha=0.3)
 
-        self.figure.tight_layout()
+        # self.figure.tight_layout() doesnt leave space for title
+        self.figure.tight_layout(rect=[0, 0.03, 1, 0.95])
 
     def create_statistics_summary(self, dataset_details):
         self.clear()

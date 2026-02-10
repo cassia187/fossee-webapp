@@ -22,6 +22,12 @@ class MatplotlibWidget(QWidget):
         self.canvas = Canvas(self, width=8, height=6, dpi=100)
         self.toolbar = NavigationToolbar(self.canvas, self)
 
+        # remove certain actions from toolbar
+        for action in self.toolbar.actions():
+            text = action.text().lower()
+            if "customize" in text or "subplot" in text or "edit" in text:
+                self.toolbar.removeAction(action)
+
         # Vertical Qt layout on the right side on dashboard
         # -----------Toolbar-----------
         # -----------Canvas------------
