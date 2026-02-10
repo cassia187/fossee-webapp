@@ -1,0 +1,225 @@
+/* ---------- GLOBAL ---------- */
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f4f6f9;
+}
+
+/* ---------- AUTH CARDS ---------- */
+.center-container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.card {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  width: 320px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.card h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.input-field {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.btn {
+  width: 100%;
+  padding: 10px;
+  background: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn:hover {
+  background: #4338ca;
+}
+
+.switch-text {
+  margin-top: 12px;
+  text-align: center;
+  font-size: 14px;
+  cursor: pointer;
+  color: #4f46e5;
+}
+
+/* ---------- DASHBOARD LAYOUT ---------- */
+.dashboard {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  background: #1f2937;
+  color: white;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.topbar .btn {
+  width: auto;
+  padding: 6px 14px;
+  background: #ef4444;
+}
+
+.body {
+  display: flex;
+  flex: 1;
+  overflow: hidden; /* Prevent double scrollbars */
+}
+
+.sidebar {
+  width: 240px;
+  background: #f3f4f6;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #ddd;
+}
+
+.sidebar button {
+  margin-bottom: 8px;
+}
+
+.sidebar .btn {
+  margin-bottom: 8px;
+}
+
+/* ---------- DATASET LIST ---------- */
+.dataset-list {
+  margin-top: 10px;
+  border: 1px solid #ccc;
+  height: 300px;
+  overflow-y: auto;
+  background: white;
+}
+
+.dataset-list div {
+  padding: 6px;
+  cursor: pointer;
+}
+
+.dataset-list div:hover {
+  background: #ddd;
+}
+
+.dataset-list .active {
+  background: #4f46e5;
+  color: white;
+}
+
+/* ---------- MAIN AREA ---------- */
+.main {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+/* ---------- CHART GRID ---------- */
+.chart-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+/* ---------- CHART BOX ---------- */
+.chart-box {
+  background: #ffffff;
+  padding: 16px;
+  border-radius: 12px;
+  min-height: 360px;
+  max-height: 420px;   /* Prevent stretching */
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Canvas control prevents Chart.js overflow */
+.chart-box canvas {
+  width: 100% !important;
+  max-height: 280px !important;
+}
+
+/* ---------- CHART TITLES ---------- */
+.chart-title {
+  font-weight: 600;
+  margin-bottom: 10px;
+  text-align: center;
+  font-size: 15px;
+  color: #374151;
+}
+
+/* ---------- EQUIPMENT CARD ---------- */
+.equipment-card {
+  margin-top: 20px;
+  background: #ffffff;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  min-height: 260px;
+}
+
+/* ---------- TABLE ---------- */
+.equipment-table {
+  margin-top: 20px;
+  background: white;
+  border-radius: 10px;
+  padding: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.equipment-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.equipment-table th,
+.equipment-table td {
+  padding: 8px;
+  border-bottom: 1px solid #ddd;
+  text-align: center;
+}
+
+.equipment-table tr:hover {
+  background: #f3f4f6;
+}
+
+/* ---------- DOWNLOAD BUTTON ---------- */
+.download-btn {
+  margin-bottom: 15px;
+  padding: 10px 16px;
+  background: #4e73df;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.download-btn:hover {
+  background: #2e59d9;
+}
+
+@media (max-width: 900px) {
+  .chart-grid {
+    grid-template-columns: 1fr;
+  }
+}
